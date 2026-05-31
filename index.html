@@ -1778,6 +1778,7 @@ if (MODE === "phone") (async function phoneMain() {
   let teamName = localStorage.getItem("tw-team-name") || "";
   let lastQKey = "";
   let submittedKey = "";
+  let hasJoined = false; // true only after the user clicks JOIN for THIS room
 
   function setMeta(text) { getMeta().innerHTML = text ? `<div class="chip">${text}</div>` : ""; }
 
@@ -1822,6 +1823,7 @@ if (MODE === "phone") (async function phoneMain() {
       await setDoc(doc(db, "rooms", JOIN_CODE, "teams", user.uid), {
         name, joinedAt: serverTimestamp(), uid: user.uid,
       });
+      hasJoined = true;
       renderForState();
     } catch (e) {
       console.error(e);
@@ -1959,13 +1961,12 @@ if (MODE === "phone") (async function phoneMain() {
         // clear submitted marker when question changes
         if (roomData.state === "question") submittedKey = "";
       }
-      // If team hasn't joined yet, stay on name entry
-      const hasName = !!teamName;
-      if (!hasName) renderNameEntry();
+      // Only switch to game state if the user has clicked JOIN for this room.
+      if (!hasJoined) renderNameEntry();
       else renderForState();
     });
-    // Show name entry first if no name; we'll attach the team doc on join
-    if (!teamName) renderNameEntry();
+    // Always start on name entry; the input is pre-filled with the last used name.
+    renderNameEntry();
   } catch (e) {
     console.error(e);
     renderError("Could not connect. Check your network and try again.");
