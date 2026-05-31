@@ -1,0 +1,1742 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Trivia Wings — Pluckers</title>
+<style>
+  :root {
+    --red: #c8102e;
+    --red-dark: #9a0a22;
+    --red-deep: #6b0717;
+    --yellow: #f4c430;
+    --yellow-bright: #ffd84d;
+    --blue: #1d3a8a;
+    --blue-dark: #142764;
+    --blue-bright: #2a52be;
+    --cream: #f7f1e3;
+    --black: #0c0c0c;
+    --panel: #222;
+    --ink: #fff8e7;
+    --ink-dim: #d9c9a0;
+    --good: #4ade80;
+    --bad: #ef4444;
+    --shadow: 0 24px 70px rgba(0,0,0,.55);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: radial-gradient(1400px 900px at 50% -15%, var(--blue-dark) 0%, #0a1234 60%, #060a1f 100%);
+    color: var(--ink);
+    font-family: "Impact", "Oswald", "Bebas Neue", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+    user-select: none; -webkit-user-select: none;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0;
+    background-image: repeating-linear-gradient(45deg, rgba(244,196,48,.035) 0 14px, transparent 14px 28px);
+    pointer-events: none; z-index: 0;
+  }
+  #app { position: relative; height: 100%; display: flex; flex-direction: column; z-index: 1; }
+
+  /* HEADER */
+  header {
+    position: relative;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 36px;
+    background:
+      linear-gradient(180deg,
+        var(--red) 0, var(--red) 14%,
+        var(--blue) 14%, var(--blue) 22%,
+        var(--yellow) 22%, var(--yellow) 78%,
+        var(--blue) 78%, var(--blue) 86%,
+        var(--red) 86%, var(--red) 100%);
+    box-shadow: 0 8px 30px rgba(0,0,0,.5);
+    flex-shrink: 0;
+  }
+  header::before, header::after {
+    content: ""; position: absolute; left: 0; right: 0;
+    height: 3px; background: var(--black);
+  }
+  header::before { top: 22%; }
+  header::after { bottom: 22%; }
+  header .brand, header .meta { position: relative; z-index: 2; }
+  .brand { display: flex; align-items: center; gap: 16px; font-weight: 900; letter-spacing: 2px; }
+  .brand .logo-badge {
+    width: 64px; height: 64px;
+    border-radius: 12px;
+    background: var(--cream);
+    display: grid; place-items: center;
+    font-size: 42px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4), inset 0 -3px 0 rgba(0,0,0,.12);
+    border: 3px solid var(--black);
+    transform: rotate(-4deg);
+  }
+  .brand .name {
+    font-size: 32px; color: var(--red);
+    text-shadow: 3px 3px 0 var(--black);
+    line-height: 1;
+  }
+  .brand .name small {
+    display: block; font-size: 12px; color: var(--blue);
+    letter-spacing: 6px; margin-top: 4px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,.2);
+  }
+  .meta { display: flex; gap: 12px; font-size: 16px; letter-spacing: 2px; color: var(--blue); }
+  .meta .chip {
+    background: var(--cream); border: 3px solid var(--blue);
+    border-radius: 8px; padding: 6px 14px;
+    font-weight: 900; color: var(--red);
+  }
+  .meta .chip b { color: var(--blue); }
+
+  main {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 24px; min-height: 0; overflow: auto;
+  }
+  .view { width: 100%; max-width: 1500px; text-align: center; }
+
+  /* TITLE */
+  .title-wrap { padding: 40px 0; }
+  .title-logo {
+    position: relative;
+    width: 320px; height: 200px;
+    margin: 0 auto 24px;
+    border-radius: 18px;
+    background:
+      linear-gradient(135deg,
+        var(--red) 0,
+        var(--red) 11.5%, var(--black) 11.5%, var(--black) 12.5%,
+        var(--blue) 12.5%, var(--blue) 26%, var(--black) 26%, var(--black) 27%,
+        var(--yellow) 27%, var(--yellow) 73%, var(--black) 73%, var(--black) 74%,
+        var(--blue) 74%, var(--blue) 87.5%, var(--black) 87.5%, var(--black) 88.5%,
+        var(--red) 88.5%, var(--red) 100%);
+    display: grid; place-items: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,.6);
+    border: 6px solid var(--black);
+  }
+  .title-logo .logo-em {
+    font-size: 130px; line-height: 1;
+    filter: drop-shadow(4px 4px 0 var(--black));
+  }
+  h1.title {
+    font-size: 130px; line-height: .95; margin: 0 0 8px;
+    color: var(--red);
+    text-shadow:
+      5px 5px 0 var(--yellow),
+      10px 10px 0 var(--blue),
+      14px 14px 0 var(--black);
+    letter-spacing: 4px;
+  }
+  h1.title .sub {
+    display: block; font-size: 80px;
+    color: var(--yellow);
+    text-shadow: 4px 4px 0 var(--blue), 8px 8px 0 var(--black);
+    letter-spacing: 14px; margin-top: 8px;
+  }
+  .lead {
+    color: var(--ink); font-size: 30px;
+    margin: 22px auto 32px; max-width: 960px;
+    letter-spacing: 2px; line-height: 1.5;
+  }
+  .lead b { color: var(--yellow); }
+
+  /* WIN PRIZES badge + INSTRUCTIONS card (title-screen flair, matches paper) */
+  .win-prizes {
+    position: fixed;
+    left: 72px; top: 50%;
+    transform: translateY(-50%) rotate(-8deg);
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 38%, var(--yellow-bright), var(--yellow) 70%);
+    border: 8px solid var(--red);
+    box-shadow: 0 0 0 6px var(--blue), 0 18px 40px rgba(0,0,0,.55);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    line-height: .9; z-index: 5;
+  }
+  .win-prizes .wp-top {
+    color: var(--blue); font-size: 50px; font-weight: 900;
+    letter-spacing: 4px; text-shadow: 2px 2px 0 rgba(0,0,0,.15);
+  }
+  .win-prizes .wp-big {
+    color: var(--red); font-size: 70px; font-weight: 900;
+    letter-spacing: 2px; text-shadow: 3px 3px 0 var(--black);
+  }
+  .instructions {
+    position: fixed;
+    right: 36px; top: 50%;
+    transform: translateY(-50%) rotate(2deg);
+    width: 460px;
+    background: #ffffff;
+    border: 6px solid var(--red);
+    border-radius: 18px;
+    box-shadow: 0 0 0 7px var(--blue), 0 20px 46px rgba(0,0,0,.55);
+    padding: 0 0 26px;
+    text-align: left;
+    overflow: hidden;
+    z-index: 5;
+  }
+  .instructions .instr-header {
+    background: var(--red); color: var(--yellow);
+    font-size: 40px; font-weight: 900; letter-spacing: 3px;
+    padding: 16px 18px; text-align: center;
+    text-shadow: 2px 2px 0 var(--black);
+    border-bottom: 5px solid var(--black);
+  }
+  .instructions .instr-qr {
+    padding: 16px 16px 12px;
+    text-align: center;
+    border-bottom: 3px dashed rgba(29,58,138,.25);
+  }
+  .instructions .instr-qr-box {
+    background: #fff;
+    border: 3px solid var(--black);
+    border-radius: 8px;
+    padding: 8px;
+    width: 200px; height: 200px;
+    margin: 0 auto;
+    display: grid; place-items: center;
+  }
+  .instructions .instr-qr-box img,
+  .instructions .instr-qr-box canvas { width: 100% !important; height: 100% !important; }
+  .instructions .instr-qr-box .qr-loading {
+    color: var(--blue); font-size: 12px; letter-spacing: 2px;
+    font-weight: 900; text-align: center;
+  }
+  .instructions .instr-qr-label {
+    color: var(--blue); font-size: 12px; letter-spacing: 3px;
+    font-weight: 900; margin-top: 10px;
+  }
+  .instructions .instr-qr-code {
+    color: var(--red); font-size: 32px; letter-spacing: 6px;
+    font-weight: 900; margin-top: 2px;
+    text-shadow: 2px 2px 0 var(--yellow);
+    line-height: 1;
+  }
+  .instructions .instr-list {
+    margin: 14px 0 0;
+    padding: 0 22px 0 54px;
+    color: var(--blue-dark);
+  }
+  .instructions .instr-list li {
+    font-size: 20px; font-weight: 800;
+    line-height: 1.3; margin-bottom: 12px;
+    letter-spacing: .3px;
+  }
+  .instructions .instr-list li:last-child { margin-bottom: 0; }
+  .instructions .instr-list li b { color: var(--red); }
+  @media (max-width: 1100px) {
+    .win-prizes { width: 150px; height: 150px; left: 16px; border-width: 6px; }
+    .win-prizes .wp-top { font-size: 28px; }
+    .win-prizes .wp-big { font-size: 38px; }
+    .instructions { width: 320px; right: 14px; }
+    .instructions .instr-header { font-size: 30px; }
+    .instructions .instr-list { padding: 0 18px 0 46px; }
+    .instructions .instr-list li { font-size: 20px; margin-bottom: 14px; }
+  }
+
+  /* BUTTONS */
+  .btn {
+    background: linear-gradient(180deg, var(--red) 0%, var(--red-dark) 100%);
+    color: var(--cream); border: 4px solid var(--black);
+    border-radius: 14px; padding: 20px 44px;
+    font-size: 26px; font-weight: 900; letter-spacing: 3px;
+    cursor: pointer;
+    box-shadow: 0 10px 0 var(--blue-dark), 0 18px 30px rgba(0,0,0,.5);
+    transition: transform .08s ease, box-shadow .12s ease, filter .15s ease;
+    font-family: inherit; text-transform: uppercase;
+    text-shadow: 2px 2px 0 var(--black);
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 4px 0 var(--blue-dark), 0 8px 16px rgba(0,0,0,.5);
+  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; filter: grayscale(.3); }
+  .btn.secondary { background: var(--yellow); color: var(--red); text-shadow: none; }
+  .btn.ghost {
+    background: transparent; color: var(--yellow);
+    border-color: var(--yellow); box-shadow: none; text-shadow: none;
+  }
+  .btn-row { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+
+  .hint {
+    margin-top: 28px; color: var(--cream);
+    font-size: 16px; letter-spacing: 2px;
+  }
+  .hint kbd {
+    display: inline-block; background: var(--yellow); color: var(--red);
+    border: 2px solid var(--black); border-bottom-width: 4px;
+    border-radius: 6px; padding: 4px 10px; margin: 0 4px;
+    font-family: inherit; font-size: 14px; font-weight: 900;
+  }
+
+  .status-pill {
+    display: inline-block; background: var(--cream); color: var(--blue-dark);
+    border: 4px solid var(--blue); border-radius: 999px;
+    padding: 14px 36px; font-size: 30px; letter-spacing: 2px;
+    margin: 0 0 24px; font-weight: 900;
+  }
+  .status-pill b { color: var(--red); }
+  .status-pill.custom { border-color: var(--red); }
+  .status-pill.custom b { color: var(--blue); }
+
+  /* LOBBY */
+  .lobby {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    max-width: 1300px; margin: 0 auto;
+    align-items: center;
+  }
+  .lobby-left {
+    background: var(--cream); border: 6px solid var(--blue);
+    border-radius: 22px; padding: 36px; color: var(--blue-dark);
+    box-shadow: var(--shadow); position: relative;
+  }
+  .lobby-left::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 14px;
+    background: linear-gradient(180deg, var(--red) 0, var(--red) 50%, var(--yellow) 50%, var(--yellow) 100%);
+    border-radius: 14px 14px 0 0;
+  }
+  .lobby-left h2 {
+    margin: 20px 0 8px;
+    font-size: 32px; color: var(--red); letter-spacing: 3px;
+    text-shadow: 2px 2px 0 var(--yellow);
+  }
+  .lobby-left .room-code {
+    font-size: 96px; color: var(--red); letter-spacing: 12px;
+    margin: 12px 0;
+    text-shadow: 4px 4px 0 var(--yellow), 8px 8px 0 var(--black);
+    line-height: 1;
+  }
+  .lobby-left .join-url {
+    color: var(--blue-dark); font-size: 13px; letter-spacing: 1px;
+    word-break: break-all; margin: 8px 0 18px;
+    font-family: ui-monospace, "Consolas", "Courier New", monospace;
+    font-weight: 900;
+  }
+  .lobby-left .qr-container {
+    background: #fff; padding: 14px; border-radius: 12px;
+    border: 4px solid var(--black);
+    width: 280px; height: 280px;
+    margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lobby-left .qr-container img,
+  .lobby-left .qr-container canvas {
+    width: 100% !important; height: 100% !important;
+  }
+  .lobby-right {
+    background: var(--cream); border: 6px solid var(--red);
+    border-radius: 22px; padding: 28px; color: var(--blue-dark);
+    box-shadow: var(--shadow); position: relative;
+    min-height: 460px;
+    display: flex; flex-direction: column;
+  }
+  .lobby-right::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 14px;
+    background: linear-gradient(180deg, var(--blue) 0, var(--blue) 50%, var(--yellow) 50%, var(--yellow) 100%);
+    border-radius: 14px 14px 0 0;
+  }
+  .lobby-right h2 {
+    margin: 20px 0 4px;
+    font-size: 32px; color: var(--blue); letter-spacing: 3px;
+    text-shadow: 2px 2px 0 var(--yellow);
+  }
+  .lobby-right .count {
+    color: var(--red); font-size: 64px; font-weight: 900;
+    letter-spacing: 4px; line-height: 1; margin: 8px 0 16px;
+    text-shadow: 3px 3px 0 var(--yellow);
+  }
+  .lobby-teams {
+    flex: 1; overflow-y: auto;
+    background: #fff; border: 3px solid var(--blue);
+    border-radius: 12px; padding: 12px;
+    text-align: left;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
+    min-height: 220px;
+  }
+  .lobby-team {
+    background: var(--cream); border-left: 4px solid var(--red);
+    padding: 8px 12px; border-radius: 6px;
+    font-size: 14px; font-weight: 900; letter-spacing: 1px;
+    color: var(--blue-dark);
+    animation: slidein .25s ease;
+  }
+  @keyframes slidein {
+    from { transform: translateX(-12px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .lobby-teams .empty {
+    grid-column: 1 / -1;
+    text-align: center; color: var(--blue);
+    font-size: 16px; letter-spacing: 2px;
+    padding: 40px 0;
+  }
+  .lobby-actions {
+    display: flex; gap: 12px; justify-content: center;
+    margin-top: 18px;
+  }
+
+  /* ROUND INTRO */
+  .round-intro { padding: 40px; }
+  .round-label {
+    font-size: 48px; letter-spacing: 18px; color: var(--cream);
+    text-shadow: 3px 3px 0 var(--blue); margin-bottom: 8px;
+  }
+  .round-number {
+    font-size: 220px; line-height: 1; color: var(--yellow);
+    text-shadow:
+      6px 6px 0 var(--red), 12px 12px 0 var(--blue), 18px 18px 0 var(--black);
+    margin: 0;
+  }
+  .round-category {
+    font-size: 84px; color: var(--red);
+    text-shadow: 4px 4px 0 var(--yellow), 8px 8px 0 var(--black);
+    margin: 16px 0 8px; letter-spacing: 6px;
+  }
+  .round-count {
+    font-size: 26px; color: var(--cream);
+    letter-spacing: 4px; margin-bottom: 32px;
+  }
+
+  /* QUESTION SCREEN (host) */
+  .q-screen-host {
+    display: grid; grid-template-columns: 1.5fr 1fr; grid-template-rows: auto 1fr auto;
+    gap: 18px; height: 100%; align-content: stretch;
+    grid-template-areas:
+      "top top"
+      "qtext tracker"
+      "footer footer";
+  }
+  .q-topbar {
+    grid-area: top;
+    display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  }
+  .q-badge {
+    background: var(--blue); border: 4px solid var(--black);
+    border-radius: 12px; padding: 10px 24px;
+    font-size: 22px; letter-spacing: 4px; color: var(--yellow);
+    text-shadow: 2px 2px 0 var(--black);
+  }
+  .q-category {
+    background: var(--red); border: 4px solid var(--black);
+    border-radius: 12px; padding: 10px 24px;
+    font-size: 22px; letter-spacing: 4px; color: var(--yellow);
+    text-shadow: 2px 2px 0 var(--black);
+  }
+  .q-text {
+    grid-area: qtext;
+    font-size: 52px; line-height: 1.2; color: var(--cream);
+    background: linear-gradient(180deg, var(--blue-dark), #0a1234);
+    border: 5px solid var(--yellow); border-radius: 22px;
+    padding: 36px 50px; box-shadow: var(--shadow);
+    letter-spacing: 1px;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+  }
+  .q-text .q-num {
+    display: inline-block; background: var(--yellow); color: var(--red);
+    border: 3px solid var(--black); border-radius: 12px;
+    padding: 4px 18px; margin-right: 18px; font-size: 44px;
+    vertical-align: middle; text-shadow: 2px 2px 0 rgba(0,0,0,.15);
+  }
+  .q-footer {
+    grid-area: footer; text-align: center;
+  }
+
+  /* SUBMISSION TRACKER (no answer text) */
+  .tracker {
+    grid-area: tracker;
+    background: var(--cream); border: 5px solid var(--blue);
+    border-radius: 18px; padding: 16px;
+    box-shadow: var(--shadow); color: var(--blue-dark);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .tracker h3 {
+    margin: 0 0 8px; color: var(--red);
+    font-size: 22px; letter-spacing: 3px; text-align: center;
+    text-shadow: 2px 2px 0 var(--yellow);
+  }
+  .tracker .stat {
+    text-align: center; color: var(--blue);
+    font-size: 36px; font-weight: 900; letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 0 var(--yellow);
+  }
+  .tracker .stat b { color: var(--red); }
+  .tracker-grid {
+    flex: 1; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 6px;
+  }
+  .tracker-cell {
+    background: #fff; border: 2px solid var(--blue);
+    border-radius: 8px; padding: 8px 10px;
+    font-size: 13px; font-weight: 900; letter-spacing: 1px;
+    color: var(--blue-dark);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 6px;
+    transition: background .3s, border-color .3s, transform .2s;
+  }
+  .tracker-cell.submitted {
+    background: linear-gradient(180deg, var(--yellow-bright), var(--yellow));
+    border-color: var(--red); color: var(--red);
+    transform: scale(1.02);
+  }
+  .tracker-cell .check { font-size: 16px; }
+
+  /* ROUND-END Q+A LIST */
+  .round-end-answers {
+    display: flex; flex-direction: column;
+    height: 100%; max-height: calc(100vh - 200px);
+    gap: 14px; text-align: center;
+  }
+  .round-end-header h2 {
+    font-size: 56px; margin: 0 0 4px;
+    color: var(--red); letter-spacing: 4px;
+    text-shadow: 6px 6px 0 var(--yellow), 12px 12px 0 var(--blue), 18px 18px 0 var(--black);
+  }
+  .round-end-answers .round-category {
+    font-size: 36px; margin: 0;
+    text-shadow: 3px 3px 0 var(--yellow), 5px 5px 0 var(--black);
+  }
+  .qa-list {
+    flex: 1; overflow: auto;
+    background: var(--cream); border: 5px solid var(--blue);
+    border-radius: 18px; padding: 18px 26px;
+    box-shadow: var(--shadow);
+    text-align: left; color: var(--blue-dark);
+  }
+  .qa-list ol {
+    list-style: none; margin: 0; padding: 0;
+    columns: 2; column-gap: 40px;
+    column-rule: 2px dashed rgba(29,58,138,.25);
+    height: 100%;
+  }
+  .qa-item {
+    break-inside: avoid; padding: 6px 0;
+    border-bottom: 1px dashed rgba(29,58,138,.15);
+  }
+  .qa-item:last-child { border-bottom: 0; }
+  .qa-q { font-weight: 900; color: var(--blue-dark); line-height: 1.25; }
+  .qa-num { display: inline-block; color: var(--red); margin-right: 8px; font-weight: 900; }
+  .qa-a { color: var(--red); margin-top: 2px; line-height: 1.2; padding-left: 4px; }
+  .qa-a b { color: var(--blue); letter-spacing: 1px; margin-right: 4px; font-size: .85em; }
+  .qa-list.qa-lg .qa-q { font-size: 36px; } .qa-list.qa-lg .qa-a { font-size: 32px; } .qa-list.qa-lg .qa-item { padding: 12px 0; }
+  .qa-list.qa-md .qa-q { font-size: 30px; } .qa-list.qa-md .qa-a { font-size: 26px; } .qa-list.qa-md .qa-item { padding: 9px 0; }
+  .qa-list.qa-sm .qa-q { font-size: 25px; } .qa-list.qa-sm .qa-a { font-size: 22px; } .qa-list.qa-sm .qa-item { padding: 7px 0; }
+  .qa-list.qa-xs .qa-q { font-size: 20px; } .qa-list.qa-xs .qa-a { font-size: 18px; } .qa-list.qa-xs .qa-item { padding: 5px 0; } .qa-list.qa-xs ol { column-gap: 28px; }
+
+  .round-end-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 24px; padding-top: 4px;
+  }
+  .round-end-footer .lead-inline {
+    color: var(--cream); font-size: 22px; letter-spacing: 3px;
+  }
+
+  /* END SCREEN */
+  .end h2 {
+    font-size: 110px; color: var(--red);
+    text-shadow: 6px 6px 0 var(--yellow), 12px 12px 0 var(--blue), 18px 18px 0 var(--black);
+    margin: 0 0 20px; letter-spacing: 6px;
+  }
+  .end p {
+    font-size: 30px; color: var(--cream);
+    letter-spacing: 3px; margin-bottom: 36px;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative; padding: 14px 32px;
+    background: var(--blue-dark);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; letter-spacing: 3px; color: var(--cream);
+    flex-shrink: 0;
+  }
+  footer::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 8px;
+    background: linear-gradient(180deg,
+      var(--red) 0, var(--red) 33%,
+      var(--yellow) 33%, var(--yellow) 66%,
+      var(--blue) 66%, var(--blue) 100%);
+  }
+  footer .controls span { margin-right: 18px; }
+  footer kbd {
+    background: var(--cream); color: var(--red);
+    border: 1px solid var(--black); border-bottom-width: 2px;
+    border-radius: 4px; padding: 2px 8px; margin: 0 2px;
+    font-family: inherit; font-weight: 900;
+  }
+
+  /* MODAL */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(6,10,31,.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; padding: 24px; overflow-y: auto;
+  }
+  .modal {
+    background: var(--cream); color: var(--blue-dark);
+    border: 6px solid var(--blue); border-radius: 20px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+    width: 100%; max-width: 780px; max-height: 92vh;
+    overflow-y: auto; padding: 28px 32px; position: relative;
+  }
+  .modal::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 14px;
+    background: linear-gradient(180deg, var(--red) 0, var(--red) 50%, var(--yellow) 50%, var(--yellow) 100%);
+    border-radius: 14px 14px 0 0;
+  }
+  .modal h2 { margin: 18px 0 6px; color: var(--red); font-size: 34px; letter-spacing: 3px; text-shadow: 2px 2px 0 var(--yellow); }
+  .modal .modal-lead { color: var(--blue-dark); font-size: 14px; line-height: 1.5; margin: 0 0 18px; letter-spacing: 1px; }
+  .modal .field { margin-bottom: 16px; }
+  .modal label { display: block; font-size: 14px; color: var(--red); letter-spacing: 3px; margin-bottom: 8px; font-weight: 900; }
+  .modal input[type=file] { display: block; width: 100%; padding: 10px; background: #fff; border: 2px dashed var(--blue); border-radius: 8px; font-family: inherit; color: var(--blue-dark); }
+  .modal textarea { width: 100%; min-height: 180px; padding: 14px; background: #fff; border: 2px solid var(--blue); border-radius: 8px; font-family: ui-monospace, "Consolas", monospace; font-size: 13px; color: var(--blue-dark); resize: vertical; line-height: 1.5; }
+  .modal textarea:focus, .modal input:focus { outline: none; border-color: var(--red); }
+  .format-tabs { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 3px solid var(--blue); }
+  .format-tab { background: transparent; border: 0; border-bottom: 4px solid transparent; margin-bottom: -3px; padding: 10px 18px; font-family: inherit; font-size: 13px; letter-spacing: 2px; font-weight: 900; color: var(--blue); cursor: pointer; }
+  .format-tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .format-help { background: rgba(29,58,138,.08); border-left: 4px solid var(--blue); padding: 10px 14px; margin: 0 0 10px; font-size: 12px; font-family: ui-monospace, "Consolas", monospace; color: var(--blue-dark); white-space: pre; overflow-x: auto; border-radius: 0 6px 6px 0; }
+  .modal-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; margin-top: 22px; padding-top: 18px; border-top: 2px solid rgba(29,58,138,.2); }
+  .modal .btn { padding: 14px 28px; font-size: 18px; box-shadow: 0 6px 0 var(--blue-dark); }
+  .modal .btn:active { box-shadow: 0 2px 0 var(--blue-dark); }
+  .modal .btn.danger { background: var(--yellow); color: var(--red); text-shadow: none; }
+  .modal .error-msg, .modal .ok-msg { padding: 10px 14px; border-radius: 8px; font-size: 14px; letter-spacing: 1px; margin-bottom: 12px; border: 2px solid var(--black); font-weight: 900; }
+  .modal .error-msg { background: var(--red); color: var(--cream); }
+  .modal .ok-msg { background: var(--blue); color: var(--yellow); }
+  .modal .close-x { position: absolute; top: 22px; right: 18px; background: transparent; border: 0; color: var(--blue); font-size: 28px; font-weight: 900; cursor: pointer; line-height: 1; padding: 4px 10px; z-index: 2; }
+  .modal .close-x:hover { color: var(--red); }
+
+  /* PHONE-MODE STYLES */
+  body.phone-mode header,
+  body.phone-mode footer { padding: 10px 18px; }
+  body.phone-mode .brand .name { font-size: 22px; }
+  body.phone-mode .brand .name small { font-size: 10px; letter-spacing: 4px; }
+  body.phone-mode .brand .logo-badge { width: 48px; height: 48px; font-size: 30px; }
+  body.phone-mode main { padding: 16px; }
+
+  .phone-screen {
+    background: var(--cream); color: var(--blue-dark);
+    border: 5px solid var(--blue); border-radius: 18px;
+    padding: 24px 22px; max-width: 460px; margin: 0 auto;
+    box-shadow: var(--shadow); position: relative;
+    text-align: center;
+  }
+  .phone-screen::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 12px;
+    background: linear-gradient(180deg, var(--red) 0, var(--red) 50%, var(--yellow) 50%, var(--yellow) 100%);
+    border-radius: 12px 12px 0 0;
+  }
+  .phone-screen h2 {
+    margin: 18px 0 8px; color: var(--red); font-size: 26px; letter-spacing: 2px;
+    text-shadow: 2px 2px 0 var(--yellow);
+  }
+  .phone-screen p { color: var(--blue-dark); font-size: 16px; letter-spacing: 1px; line-height: 1.4; }
+  .phone-screen .big-label { font-size: 14px; color: var(--blue); letter-spacing: 3px; font-weight: 900; margin-top: 14px; }
+  .phone-screen .room-mini {
+    background: var(--blue); color: var(--yellow);
+    border: 3px solid var(--black); border-radius: 8px;
+    padding: 4px 14px; font-size: 22px; letter-spacing: 6px;
+    display: inline-block; margin: 6px 0 0;
+    text-shadow: 2px 2px 0 var(--black);
+  }
+  .phone-input {
+    width: 100%; padding: 14px 16px;
+    background: #fff; border: 3px solid var(--blue);
+    border-radius: 10px; font-family: inherit; font-weight: 900;
+    color: var(--blue-dark); font-size: 18px;
+    margin: 12px 0;
+  }
+  .phone-input:focus { outline: none; border-color: var(--red); }
+  .phone-btn {
+    background: linear-gradient(180deg, var(--red) 0%, var(--red-dark) 100%);
+    color: var(--cream); border: 3px solid var(--black);
+    border-radius: 10px; padding: 14px 32px;
+    font-size: 18px; font-weight: 900; letter-spacing: 3px;
+    font-family: inherit; text-transform: uppercase;
+    cursor: pointer; width: 100%;
+    box-shadow: 0 6px 0 var(--blue-dark);
+    text-shadow: 2px 2px 0 var(--black);
+  }
+  .phone-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--blue-dark); }
+  .phone-btn:disabled { opacity: .5; }
+  .phone-question {
+    font-size: 22px; color: var(--blue-dark);
+    font-weight: 900; line-height: 1.3; padding: 14px 0;
+    border-top: 2px dashed rgba(29,58,138,.25);
+    border-bottom: 2px dashed rgba(29,58,138,.25);
+    margin: 14px 0;
+  }
+  .phone-question .qnum {
+    display: inline-block; background: var(--yellow); color: var(--red);
+    border: 2px solid var(--black); border-radius: 8px;
+    padding: 2px 10px; margin-right: 8px; font-size: 18px;
+  }
+  .phone-cat {
+    background: var(--red); color: var(--yellow);
+    border: 3px solid var(--black); border-radius: 8px;
+    padding: 6px 14px; font-size: 14px; letter-spacing: 2px;
+    display: inline-block; text-shadow: 2px 2px 0 var(--black);
+  }
+  .phone-team {
+    background: var(--yellow); color: var(--red); border: 2px solid var(--black);
+    border-radius: 999px; padding: 4px 14px; font-size: 13px;
+    display: inline-block; letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .phone-submitted {
+    background: linear-gradient(180deg, var(--yellow-bright), var(--yellow));
+    border: 3px solid var(--red); color: var(--red);
+    border-radius: 12px; padding: 16px;
+    font-size: 20px; font-weight: 900; letter-spacing: 2px;
+    margin: 14px 0;
+  }
+  .phone-error {
+    background: var(--red); color: var(--cream);
+    border: 3px solid var(--black); border-radius: 10px;
+    padding: 14px; margin-bottom: 14px;
+    font-size: 14px; letter-spacing: 1px; font-weight: 900;
+  }
+
+  @keyframes pop { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .pop { animation: pop .25s ease; }
+
+  /* Corner QR widget — visible on most host screens for late joiners */
+  .corner-qr {
+    position: fixed;
+    top: 110px; right: 24px;
+    background: var(--cream);
+    border: 4px solid var(--blue);
+    border-radius: 14px;
+    padding: 18px 12px 12px;
+    box-shadow: 0 10px 28px rgba(0,0,0,.45);
+    z-index: 10;
+    width: 200px;
+    text-align: center;
+    display: none;
+  }
+  .corner-qr.show { display: block; }
+  .corner-qr::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: linear-gradient(180deg, var(--red) 0, var(--red) 50%, var(--yellow) 50%, var(--yellow) 100%);
+    border-radius: 10px 10px 0 0;
+  }
+  .corner-qr .qr-mini {
+    background: #fff;
+    border: 2px solid var(--black);
+    border-radius: 6px;
+    padding: 8px;
+    margin: 8px 0;
+    width: 100%; aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .corner-qr .qr-mini img,
+  .corner-qr .qr-mini canvas { width: 100% !important; height: 100% !important; }
+  .corner-qr .qr-placeholder {
+    background: rgba(29,58,138,.08);
+    border: 2px dashed var(--blue);
+    width: 100%; aspect-ratio: 1;
+    border-radius: 6px;
+    margin: 8px 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--blue); font-size: 11px; letter-spacing: 1px;
+    padding: 12px; text-align: center; line-height: 1.4;
+    font-weight: 900;
+  }
+  .corner-qr .qr-label {
+    color: var(--blue); font-size: 11px; letter-spacing: 2px;
+    font-weight: 900;
+  }
+  .corner-qr .qr-code {
+    color: var(--red); font-size: 22px; letter-spacing: 4px;
+    font-weight: 900; margin-top: 2px;
+    text-shadow: 2px 2px 0 var(--yellow);
+  }
+  body.phone-mode .corner-qr { display: none !important; }
+
+  @media (max-width: 900px) {
+    h1.title { font-size: 70px; }
+    h1.title .sub { font-size: 44px; letter-spacing: 8px; }
+    .q-text { font-size: 32px; padding: 24px; }
+    .round-number { font-size: 140px; }
+    .round-category { font-size: 56px; letter-spacing: 4px; }
+    .lobby { grid-template-columns: 1fr; }
+    .q-screen-host { grid-template-columns: 1fr; grid-template-areas: "top" "qtext" "tracker" "footer"; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <div class="logo-badge" aria-hidden="true">🍗</div>
+      <div class="name">TRIVIA WINGS<small>POWERED BY PLUCKERS</small></div>
+    </div>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <main id="main"></main>
+
+  <div id="modalRoot"></div>
+
+  <div id="cornerQR" class="corner-qr"></div>
+
+  <footer>
+    <div class="controls" id="footerControls">
+      <span><kbd>SPACE</kbd> / <kbd>→</kbd> NEXT</span>
+      <span><kbd>←</kbd> BACK</span>
+      <span><kbd>L</kbd> LOAD</span>
+      <span><kbd>F</kbd> FULLSCREEN</span>
+      <span><kbd>ESC</kbd> MENU</span>
+    </div>
+    <div id="footerNote">ANSWERS REVEALED AT THE END OF EACH ROUND</div>
+  </footer>
+</div>
+
+<!-- QR code library (CDN, sets global QRCode) -->
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc,
+  onSnapshot, collection, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ============================================================
+// FIREBASE
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCzUb5MdrtJ67yy_i2pw7MQOdyBw9siGPw",
+  authDomain: "triva-wings.firebaseapp.com",
+  projectId: "triva-wings",
+  storageBucket: "triva-wings.firebasestorage.app",
+  messagingSenderId: "1046638285273",
+  appId: "1:1046638285273:web:7d6c9d7e0018af5e9a09c8"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// ============================================================
+// MODE DETECTION
+// ============================================================
+const params = new URLSearchParams(location.search);
+const JOIN_CODE = (params.get("join") || "").toUpperCase().trim();
+const MODE = JOIN_CODE ? "phone" : "host";
+if (MODE === "phone") document.body.classList.add("phone-mode");
+
+// ============================================================
+// HELPERS
+// ============================================================
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function genRoomCode() {
+  // 4-char code from unambiguous alphabet
+  const A = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let s = "";
+  for (let i = 0; i < 4; i++) s += A[Math.floor(Math.random() * A.length)];
+  return s;
+}
+function getMain() { return document.getElementById("main"); }
+function getMeta() { return document.getElementById("meta"); }
+
+async function ensureAuth() {
+  if (auth.currentUser) return auth.currentUser;
+  return new Promise((resolve, reject) => {
+    let resolved = false;
+    onAuthStateChanged(auth, (u) => {
+      if (u && !resolved) { resolved = true; resolve(u); }
+    });
+    signInAnonymously(auth).catch(reject);
+  });
+}
+
+// ============================================================
+// SHARED: DEFAULT PACK
+// ============================================================
+const STORAGE_KEY = "trivia-wings-rounds";
+const DEFAULT_ROUNDS = [
+  { category: "Category 1", questions: Array.from({length:10}, (_,i)=>({ q:`Placeholder question 1.${i+1} — load your own via L`, a:"answer" })) },
+  { category: "Category 2", questions: Array.from({length:10}, (_,i)=>({ q:`Placeholder question 2.${i+1}`, a:"answer" })) },
+  { category: "Category 3", questions: Array.from({length:10}, (_,i)=>({ q:`Placeholder question 3.${i+1}`, a:"answer" })) },
+  { category: "Category 4", questions: Array.from({length:10}, (_,i)=>({ q:`Placeholder question 4.${i+1}`, a:"answer" })) },
+  { category: "Category 5", questions: Array.from({length:10}, (_,i)=>({ q:`Placeholder question 5.${i+1}`, a:"answer" })) },
+  { category: "Category 6", questions: Array.from({length:10}, (_,i)=>({ q:`Placeholder question 6.${i+1}`, a:"answer" })) },
+  { category: "Category 7", questions: Array.from({length:10}, (_,i)=>({ q:`Placeholder question 7.${i+1}`, a:"answer" })) },
+];
+
+function loadRoundsFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULT_ROUNDS;
+    const parsed = JSON.parse(raw);
+    if (validateRounds(parsed)) return normalizeRounds(parsed);
+  } catch (e) { /* ignore */ }
+  return DEFAULT_ROUNDS;
+}
+function saveRoundsToStorage(rounds) { localStorage.setItem(STORAGE_KEY, JSON.stringify(rounds)); }
+function clearStoredRounds() { localStorage.removeItem(STORAGE_KEY); }
+
+function validateRounds(data) {
+  if (!Array.isArray(data) || data.length === 0)
+    throw new Error("Must be a non-empty list of categories.");
+  data.forEach((r, i) => {
+    if (!r || typeof r.category !== "string" || !r.category.trim())
+      throw new Error(`Category ${i + 1}: missing 'category' name.`);
+    if (!Array.isArray(r.questions) || r.questions.length === 0)
+      throw new Error(`Category "${r.category}": needs at least one question.`);
+    r.questions.forEach((q, j) => {
+      if (typeof q === "string") {
+        if (!q.trim()) throw new Error(`Category "${r.category}", q${j + 1}: empty.`);
+      } else if (q && typeof q === "object") {
+        if (typeof q.q !== "string" || !q.q.trim())
+          throw new Error(`Category "${r.category}", q${j + 1}: missing 'q'.`);
+        if (q.a !== undefined && q.a !== null && typeof q.a !== "string")
+          throw new Error(`Category "${r.category}", q${j + 1}: 'a' must be a string.`);
+      } else {
+        throw new Error(`Category "${r.category}", q${j + 1}: must be string or {q,a}.`);
+      }
+    });
+  });
+  return true;
+}
+function normalizeRounds(data) {
+  return data.map(r => ({
+    category: r.category.trim(),
+    questions: r.questions.map(q => {
+      if (typeof q === "string") return { q: q.trim(), a: "" };
+      return { q: (q.q || "").trim(), a: (q.a || "").trim() };
+    })
+  }));
+}
+function parseJsonRounds(text) {
+  const parsed = JSON.parse(text);
+  const arr = Array.isArray(parsed) ? parsed
+    : Array.isArray(parsed.categories)
+      ? parsed.categories.map(c => ({ category: c.name || c.category, questions: c.questions || [] }))
+      : null;
+  if (!arr) throw new Error("JSON must be an array of categories or have a 'categories' array.");
+  validateRounds(arr);
+  return normalizeRounds(arr);
+}
+function parseTextRounds(text) {
+  const lines = text.split(/\r?\n/);
+  const rounds = []; let current = null;
+  for (const raw of lines) {
+    const line = raw.trim(); if (!line) continue;
+    const catMatch = line.match(/^#{1,3}\s*(.+)$/);
+    if (catMatch) { current = { category: catMatch[1].trim(), questions: [] }; rounds.push(current); }
+    else {
+      if (!current) throw new Error("Text must start with a category header (e.g. '## Sports').");
+      let q = line, a = "";
+      const sep = line.match(/^(.*?)\s*(?:\||::)\s*(.+)$/);
+      if (sep) { q = sep[1].trim(); a = sep[2].trim(); }
+      current.questions.push({ q, a });
+    }
+  }
+  validateRounds(rounds);
+  return normalizeRounds(rounds);
+}
+
+// ============================================================
+// HOST MODE
+// ============================================================
+if (MODE === "host") (async function hostMain() {
+  let ROUNDS = loadRoundsFromStorage();
+  const State = { TITLE:"title", LOBBY:"lobby", ROUND_INTRO:"round_intro", QUESTION:"question", ROUND_END:"round_end", END:"end" };
+  const game = { state: State.TITLE, roundIdx: 0, questionIdx: 0, roomCode: null, teams: {}, submissions: {} };
+
+  let roomRef = null;
+  let unsubTeams = null;
+  let unsubSubs = null;
+
+  function totalQuestions() { return ROUNDS.reduce((s, r) => s + r.questions.length, 0); }
+
+  function renderMeta() {
+    const meta = getMeta();
+    if (game.state === State.TITLE || game.state === State.END) { meta.innerHTML = ""; return; }
+    let chips = "";
+    if (game.roomCode) chips += `<div class="chip">ROOM <b>${game.roomCode}</b></div>`;
+    if (game.state !== State.LOBBY && ROUNDS[game.roundIdx]) {
+      chips += `<div class="chip">ROUND <b>${game.roundIdx + 1}</b> / ${ROUNDS.length}</div>`;
+      if (game.state === State.QUESTION) {
+        const round = ROUNDS[game.roundIdx];
+        chips += `<div class="chip">Q <b>${game.questionIdx + 1}</b> / ${round.questions.length}</div>`;
+      }
+    }
+    meta.innerHTML = chips;
+  }
+
+  function viewTitle() {
+    const isCustom = !!localStorage.getItem(STORAGE_KEY);
+    const counts = ROUNDS.map(r => r.questions.length);
+    const uniform = counts.every(c => c === counts[0]);
+    const qLabel = uniform ? `<b>${counts[0]}</b> questions each` : `<b>${totalQuestions()}</b> questions total`;
+    const code = game.roomCode || ". . . .";
+    getMain().innerHTML = `
+      <div class="view title-wrap">
+        <div class="win-prizes">
+          <span class="wp-top">WIN</span>
+          <span class="wp-big">PRIZES!</span>
+        </div>
+        <div class="instructions">
+          <div class="instr-header">JOIN ON YOUR PHONE</div>
+          <div class="instr-qr">
+            <div class="instr-qr-box" id="instrQR"><div class="qr-loading">PREPARING<br/>ROOM…</div></div>
+            <div class="instr-qr-label">ROOM CODE</div>
+            <div class="instr-qr-code">${escapeHtml(code)}</div>
+          </div>
+          <ol class="instr-list">
+            <li><b>Scan</b> the QR code with your phone.</li>
+            <li>Pick a <b>team name.</b></li>
+            <li>Type your answer for each question.</li>
+            <li><b>Host announces the winners!</b></li>
+          </ol>
+        </div>
+        <div class="title-logo"><span class="logo-em">🍗</span></div>
+        <h1 class="title">TRIVIA<span class="sub">WINGS</span></h1>
+        <div class="status-pill ${isCustom ? "custom" : ""}"><b>${ROUNDS.length}</b> rounds &nbsp;•&nbsp; ${qLabel}</div>
+        <div class="btn-row">
+          <button class="btn" id="startBtn">START GAME</button>
+          <button class="btn secondary" id="loadBtn">LOAD QUESTIONS</button>
+        </div>
+        <div class="hint">Press <kbd>SPACE</kbd> to start &nbsp;•&nbsp; <kbd>L</kbd> to load questions &nbsp;•&nbsp; <kbd>F</kbd> for fullscreen</div>
+      </div>
+    `;
+    document.getElementById("startBtn").addEventListener("click", startNewRoom);
+    document.getElementById("loadBtn").addEventListener("click", openLoadModal);
+    // Fill in QR if room exists; otherwise kick off room creation
+    if (game.roomCode) {
+      const joinUrl = `${location.origin}${location.pathname}?join=${game.roomCode}`;
+      const qrBox = document.getElementById("instrQR");
+      if (qrBox) {
+        qrBox.innerHTML = "";
+        try {
+          new QRCode(qrBox, {
+            text: joinUrl,
+            width: 184, height: 184,
+            colorDark: "#0c0c0c", colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+        } catch (e) { console.warn("Title QR render failed:", e); }
+      }
+    } else {
+      ensureRoom();
+    }
+  }
+
+  let creatingRoom = false;
+  async function ensureRoom() {
+    if (game.roomCode || creatingRoom) return;
+    creatingRoom = true;
+    try {
+      await ensureAuth();
+      let code = genRoomCode();
+      const ref = doc(db, "rooms", code);
+      const existing = await getDoc(ref);
+      if (existing.exists()) code = genRoomCode();
+      const ref2 = doc(db, "rooms", code);
+      await setDoc(ref2, {
+        state: "lobby",
+        roundIdx: 0,
+        questionIdx: 0,
+        currentCategory: "",
+        currentQuestion: "",
+        totalRounds: ROUNDS.length,
+        createdAt: serverTimestamp(),
+        hostUid: auth.currentUser.uid,
+      });
+      game.roomCode = code;
+      roomRef = ref2;
+      unsubTeams = onSnapshot(collection(db, "rooms", code, "teams"), (snap) => {
+        const teams = {};
+        snap.forEach(d => { teams[d.id] = d.data(); });
+        game.teams = teams;
+        if (game.state === State.TITLE) {
+          // Update count in instructions card silently — full re-render not needed
+          const codeEl = document.querySelector(".instr-qr-code");
+          if (codeEl && game.roomCode) codeEl.textContent = game.roomCode;
+        }
+        if (game.state === State.LOBBY) renderLobbyTeams();
+        if (game.state === State.QUESTION) renderTracker();
+      });
+      unsubSubs = onSnapshot(collection(db, "rooms", code, "submissions"), (snap) => {
+        const subs = {};
+        snap.forEach(d => { subs[d.id] = d.data(); });
+        game.submissions = subs;
+        if (game.state === State.QUESTION) renderTracker();
+      });
+      // Re-render the current screen to fill in the QR
+      render();
+    } catch (err) {
+      console.error("Failed to create room:", err);
+      const codeEl = document.querySelector(".instr-qr-code");
+      if (codeEl) codeEl.textContent = "ERROR";
+      const qrBox = document.getElementById("instrQR");
+      if (qrBox) qrBox.innerHTML = `<div class="qr-loading" style="color:var(--red);">FIREBASE<br/>NOT READY</div>`;
+    } finally {
+      creatingRoom = false;
+    }
+  }
+
+  async function startNewRoom() {
+    // Room should already exist from title-screen ensureRoom; create if not.
+    if (!game.roomCode) await ensureRoom();
+    if (!game.roomCode) return; // creation failed
+    game.state = State.LOBBY;
+    render();
+  }
+
+  function viewLobby() {
+    const joinUrl = `${location.origin}${location.pathname}?join=${game.roomCode}`;
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="lobby pop">
+          <div class="lobby-left">
+            <div style="color:var(--blue);font-size:14px;letter-spacing:3px;font-weight:900;margin-top:16px;">SCAN TO JOIN</div>
+            <div class="room-code">${game.roomCode}</div>
+            <div class="qr-container" id="qrBox"></div>
+            <div class="join-url">${escapeHtml(joinUrl)}</div>
+          </div>
+          <div class="lobby-right">
+            <h2>TEAMS JOINED</h2>
+            <div class="count" id="teamCount">0</div>
+            <div class="lobby-teams" id="teamList"><div class="empty">Waiting for first team to scan in…</div></div>
+            <div class="lobby-actions">
+              <button class="btn ghost" id="abortBtn" style="border-color:var(--blue);color:var(--blue);">CANCEL</button>
+              <button class="btn" id="lobbyStartBtn">START THE GAME →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    // Render QR
+    const qrBox = document.getElementById("qrBox");
+    qrBox.innerHTML = "";
+    new QRCode(qrBox, {
+      text: joinUrl,
+      width: 260, height: 260,
+      colorDark: "#0c0c0c", colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+    renderLobbyTeams();
+    document.getElementById("lobbyStartBtn").addEventListener("click", advance);
+    document.getElementById("abortBtn").addEventListener("click", () => backToMenu());
+  }
+
+  function renderLobbyTeams() {
+    const list = document.getElementById("teamList");
+    const count = document.getElementById("teamCount");
+    if (!list || !count) return;
+    const teams = Object.values(game.teams);
+    count.textContent = teams.length;
+    if (teams.length === 0) {
+      list.innerHTML = `<div class="empty">Waiting for first team to scan in…</div>`;
+    } else {
+      list.innerHTML = teams
+        .sort((a, b) => (a.joinedAt?.seconds || 0) - (b.joinedAt?.seconds || 0))
+        .map(t => `<div class="lobby-team">${escapeHtml(t.name || "Team")}</div>`)
+        .join("");
+    }
+  }
+
+  function viewRoundIntro() {
+    const round = ROUNDS[game.roundIdx];
+    getMain().innerHTML = `
+      <div class="view round-intro pop">
+        <div class="round-label">ROUND</div>
+        <div class="round-number">${game.roundIdx + 1}</div>
+        <div class="round-category">${escapeHtml(round.category).toUpperCase()}</div>
+        <div class="round-count">${round.questions.length} QUESTIONS</div>
+        <div class="btn-row"><button class="btn" id="goBtn">LET'S GO!</button></div>
+        <div class="hint">Press <kbd>SPACE</kbd> to start the round</div>
+      </div>
+    `;
+    document.getElementById("goBtn").addEventListener("click", advance);
+  }
+
+  function viewQuestion() {
+    const round = ROUNDS[game.roundIdx];
+    const q = round.questions[game.questionIdx];
+    const qText = typeof q === "string" ? q : q.q;
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="q-screen-host">
+          <div class="q-topbar">
+            <div class="q-badge">Q ${game.questionIdx + 1} OF ${round.questions.length}</div>
+            <div class="q-category">${escapeHtml(round.category).toUpperCase()}</div>
+          </div>
+          <div class="q-text">
+            <div><span class="q-num">${game.questionIdx + 1}</span>${escapeHtml(qText)}</div>
+          </div>
+          <div class="tracker">
+            <h3>SUBMISSIONS</h3>
+            <div class="stat"><b id="subCount">0</b> / <span id="teamTotal">0</span></div>
+            <div class="tracker-grid" id="trackerGrid"></div>
+          </div>
+          <div class="q-footer">
+            <div class="hint">Press <kbd>SPACE</kbd> for next question &nbsp;•&nbsp; <kbd>←</kbd> to go back</div>
+          </div>
+        </div>
+      </div>
+    `;
+    renderTracker();
+  }
+
+  function renderTracker() {
+    const grid = document.getElementById("trackerGrid");
+    const sub = document.getElementById("subCount");
+    const tot = document.getElementById("teamTotal");
+    if (!grid || !sub || !tot) return;
+    const teams = Object.entries(game.teams)
+      .map(([uid, t]) => ({ uid, ...t }))
+      .sort((a, b) => (a.joinedAt?.seconds || 0) - (b.joinedAt?.seconds || 0));
+    const submittedTeamIds = new Set();
+    const key = `${game.roundIdx}_${game.questionIdx}_`;
+    for (const [id, s] of Object.entries(game.submissions)) {
+      if (id.startsWith(key)) submittedTeamIds.add(s.teamId);
+    }
+    tot.textContent = teams.length;
+    sub.textContent = submittedTeamIds.size;
+    grid.innerHTML = teams.map(t => {
+      const ok = submittedTeamIds.has(t.uid);
+      return `<div class="tracker-cell ${ok ? "submitted" : ""}">
+        <span>${escapeHtml(t.name || "Team")}</span>
+        <span class="check">${ok ? "✓" : "·"}</span>
+      </div>`;
+    }).join("");
+  }
+
+  function viewRoundEnd() {
+    const round = ROUNDS[game.roundIdx];
+    const isLast = game.roundIdx >= ROUNDS.length - 1;
+    const count = round.questions.length;
+    let sizeClass = "qa-lg";
+    if (count > 5) sizeClass = "qa-md";
+    if (count > 8) sizeClass = "qa-sm";
+    if (count > 12) sizeClass = "qa-xs";
+    const items = round.questions.map((q, i) => {
+      const qText = typeof q === "string" ? q : (q.q || "");
+      const aText = typeof q === "string" ? "" : (q.a || "");
+      return `
+        <li class="qa-item">
+          <div class="qa-q"><span class="qa-num">${i + 1}.</span>${escapeHtml(qText)}</div>
+          <div class="qa-a">${aText ? "<b>ANSWER:</b> " + escapeHtml(aText) : "<b>ANSWER:</b> <em style=\"opacity:.6\">(not provided)</em>"}</div>
+        </li>
+      `;
+    }).join("");
+    getMain().innerHTML = `
+      <div class="view round-end-answers pop">
+        <div class="round-end-header">
+          <h2>END OF ROUND ${game.roundIdx + 1}</h2>
+          <div class="round-category">${escapeHtml(round.category).toUpperCase()}</div>
+        </div>
+        <div class="qa-list ${sizeClass}"><ol>${items}</ol></div>
+        <div class="round-end-footer">
+          <span class="lead-inline">Tally your scores &nbsp;•&nbsp; Get ready for the next round</span>
+          <button class="btn" id="nextBtn">${isLast ? "FINISH GAME" : "NEXT ROUND"}</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("nextBtn").addEventListener("click", advance);
+  }
+
+  function viewEnd() {
+    getMain().innerHTML = `
+      <div class="view end pop">
+        <h2>THANKS FOR PLAYING!</h2>
+        <p>Hope you enjoyed Trivia Wings.<br/>Highest score wins — see your server for prizes.</p>
+        <div class="btn-row">
+          <button class="btn" id="againBtn">NEW GAME</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("againBtn").addEventListener("click", async () => {
+      await cleanupRoom();
+      game.state = State.TITLE; render();
+    });
+  }
+
+  function render() {
+    renderMeta();
+    switch (game.state) {
+      case State.TITLE: viewTitle(); break;
+      case State.LOBBY: viewLobby(); break;
+      case State.ROUND_INTRO: viewRoundIntro(); break;
+      case State.QUESTION: viewQuestion(); break;
+      case State.ROUND_END: viewRoundEnd(); break;
+      case State.END: viewEnd(); break;
+    }
+    updateCornerQR();
+    syncRoomState();
+  }
+
+  function updateCornerQR() {
+    const el = document.getElementById("cornerQR");
+    if (!el) return;
+    // Show on round_intro, question, end. Hide on title (instructions card occupies that spot), lobby (big QR already), and round_end (answer reveal).
+    const shouldShow = [State.ROUND_INTRO, State.QUESTION, State.END].includes(game.state);
+    if (!shouldShow) { el.classList.remove("show"); el.innerHTML = ""; return; }
+    el.classList.add("show");
+    if (!game.roomCode) {
+      // Safety net (shouldn't normally trigger now that title hides this widget)
+      el.classList.remove("show"); return;
+    } else {
+      const joinUrl = `${location.origin}${location.pathname}?join=${game.roomCode}`;
+      el.innerHTML = `
+        <div class="qr-mini" id="cornerQRBox"></div>
+        <div class="qr-label">SCAN TO JOIN</div>
+        <div class="qr-code">${game.roomCode}</div>
+      `;
+      const qrBox = el.querySelector("#cornerQRBox");
+      qrBox.innerHTML = "";
+      try {
+        new QRCode(qrBox, {
+          text: joinUrl,
+          width: 160, height: 160,
+          colorDark: "#0c0c0c", colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M,
+        });
+      } catch (e) { console.warn("Corner QR render failed:", e); }
+    }
+  }
+
+  async function syncRoomState() {
+    if (!roomRef) return;
+    // Phones see "lobby" while host is on title — teams can join early.
+    const roomState = (game.state === State.TITLE) ? "lobby" : game.state;
+    const update = {
+      state: roomState,
+      roundIdx: game.roundIdx,
+      questionIdx: game.questionIdx,
+    };
+    if (game.state === State.QUESTION) {
+      const round = ROUNDS[game.roundIdx];
+      const q = round.questions[game.questionIdx];
+      update.currentQuestion = (typeof q === "string" ? q : q.q) || "";
+      update.currentCategory = round.category || "";
+    } else if (game.state === State.ROUND_INTRO) {
+      update.currentCategory = ROUNDS[game.roundIdx]?.category || "";
+      update.currentQuestion = "";
+    } else {
+      update.currentQuestion = "";
+    }
+    try { await updateDoc(roomRef, update); }
+    catch (e) { console.warn("Room sync failed:", e); }
+  }
+
+  function advance() {
+    switch (game.state) {
+      case State.TITLE: return; // handled by startBtn
+      case State.LOBBY:
+        game.state = State.ROUND_INTRO;
+        game.roundIdx = 0; game.questionIdx = 0;
+        break;
+      case State.ROUND_INTRO:
+        game.state = State.QUESTION; game.questionIdx = 0; break;
+      case State.QUESTION: {
+        const round = ROUNDS[game.roundIdx];
+        if (game.questionIdx < round.questions.length - 1) game.questionIdx++;
+        else game.state = State.ROUND_END;
+        break;
+      }
+      case State.ROUND_END:
+        if (game.roundIdx < ROUNDS.length - 1) {
+          game.roundIdx++; game.questionIdx = 0;
+          game.state = State.ROUND_INTRO;
+        } else game.state = State.END;
+        break;
+    }
+    render();
+  }
+  function goBack() {
+    switch (game.state) {
+      case State.QUESTION:
+        if (game.questionIdx > 0) game.questionIdx--;
+        else game.state = State.ROUND_INTRO;
+        break;
+      case State.ROUND_END:
+        game.state = State.QUESTION;
+        game.questionIdx = ROUNDS[game.roundIdx].questions.length - 1;
+        break;
+      case State.ROUND_INTRO:
+        if (game.roundIdx > 0) { game.roundIdx--; game.state = State.ROUND_END; }
+        else game.state = State.LOBBY;
+        break;
+      case State.END:
+        game.state = State.ROUND_END;
+        game.roundIdx = ROUNDS.length - 1; break;
+    }
+    render();
+  }
+  async function backToMenu() {
+    await cleanupRoom();
+    game.state = State.TITLE; game.roundIdx = 0; game.questionIdx = 0;
+    render();
+    ensureRoom(); // create a fresh room so the title QR is live again
+  }
+  async function cleanupRoom() {
+    if (unsubTeams) { unsubTeams(); unsubTeams = null; }
+    if (unsubSubs) { unsubSubs(); unsubSubs = null; }
+    if (roomRef) {
+      try { await deleteDoc(roomRef); } catch (e) { /* ignore */ }
+      roomRef = null;
+    }
+    game.roomCode = null;
+    game.teams = {}; game.submissions = {};
+  }
+
+  // INPUT
+  document.addEventListener("keydown", (e) => {
+    if (e.repeat) return;
+    if (document.getElementById("loadModal")) {
+      if (e.key === "Escape") { e.preventDefault(); closeLoadModal(); }
+      return;
+    }
+    if (e.target.matches("input, textarea")) return;
+    switch (e.key) {
+      case " ": case "ArrowRight": case "Enter":
+        e.preventDefault();
+        if (game.state === State.TITLE) startNewRoom();
+        else advance();
+        break;
+      case "ArrowLeft":
+        e.preventDefault(); goBack(); break;
+      case "f": case "F":
+        e.preventDefault(); toggleFullscreen(); break;
+      case "l": case "L":
+        if (game.state === State.TITLE) { e.preventDefault(); openLoadModal(); }
+        break;
+      case "Escape":
+        e.preventDefault();
+        if (game.state !== State.TITLE) backToMenu();
+        break;
+    }
+  });
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+
+  // LOAD MODAL
+  let modalFormat = "text";
+  function openLoadModal() {
+    document.getElementById("modalRoot").innerHTML = `
+      <div class="modal-backdrop" id="loadModal">
+        <div class="modal" role="dialog">
+          <button class="close-x" id="closeX">×</button>
+          <h2>LOAD QUESTIONS</h2>
+          <p class="modal-lead">Upload a file or paste below. Include the answer after a <b>|</b>.</p>
+          <div class="format-tabs">
+            <button class="format-tab ${modalFormat === "text" ? "active" : ""}" data-fmt="text">PLAIN TEXT</button>
+            <button class="format-tab ${modalFormat === "json" ? "active" : ""}" data-fmt="json">JSON</button>
+          </div>
+          <div class="format-help" id="formatHelp"></div>
+          <div id="msgArea"></div>
+          <div class="field">
+            <label>UPLOAD A FILE (.txt OR .json)</label>
+            <input type="file" id="fileInput" accept=".txt,.json,text/plain,application/json" />
+          </div>
+          <div class="field">
+            <label>OR PASTE YOUR QUESTIONS</label>
+            <textarea id="pasteArea" placeholder="Paste your questions here..."></textarea>
+          </div>
+          <div class="modal-actions">
+            <button class="btn danger" id="resetBtn">RESET TO DEFAULT</button>
+            <button class="btn secondary" id="cancelBtn">CANCEL</button>
+            <button class="btn" id="applyBtn">APPLY</button>
+          </div>
+        </div>
+      </div>
+    `;
+    updateFormatHelp();
+    document.getElementById("closeX").addEventListener("click", closeLoadModal);
+    document.getElementById("cancelBtn").addEventListener("click", closeLoadModal);
+    document.getElementById("applyBtn").addEventListener("click", applyFromModal);
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      if (confirm("Reset to the built-in default questions?")) {
+        clearStoredRounds(); ROUNDS = DEFAULT_ROUNDS.slice();
+        closeLoadModal(); render();
+      }
+    });
+    document.getElementById("fileInput").addEventListener("change", handleFilePicked);
+    document.querySelectorAll(".format-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        modalFormat = tab.dataset.fmt;
+        document.querySelectorAll(".format-tab").forEach(t => t.classList.toggle("active", t === tab));
+        updateFormatHelp();
+      });
+    });
+    document.getElementById("loadModal").addEventListener("click", (e) => {
+      if (e.target.id === "loadModal") closeLoadModal();
+    });
+  }
+  function closeLoadModal() { document.getElementById("modalRoot").innerHTML = ""; }
+  function updateFormatHelp() {
+    const el = document.getElementById("formatHelp"); if (!el) return;
+    if (modalFormat === "text") {
+      el.textContent =
+        "## Category Name\nQuestion text? | Answer\nAnother question? | Its answer\n\n## Next Category\nQuestion? | Answer\n\n(Use \" | \" to separate question and answer.)";
+    } else {
+      el.textContent =
+        '[\n  {\n    "category": "Sports",\n    "questions": [\n      { "q": "Players on a soccer team?", "a": "11" },\n      { "q": "Sport that uses \'love\' for zero?", "a": "Tennis" }\n    ]\n  }\n]';
+    }
+  }
+  function showModalMsg(text, type) {
+    const el = document.getElementById("msgArea"); if (!el) return;
+    el.innerHTML = `<div class="${type === "ok" ? "ok-msg" : "error-msg"}">${escapeHtml(text)}</div>`;
+  }
+  function handleFilePicked(e) {
+    const file = e.target.files?.[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById("pasteArea").value = ev.target.result;
+      if (file.name.toLowerCase().endsWith(".json")) modalFormat = "json";
+      else if (file.name.toLowerCase().endsWith(".txt")) modalFormat = "text";
+      document.querySelectorAll(".format-tab").forEach(t => t.classList.toggle("active", t.dataset.fmt === modalFormat));
+      updateFormatHelp();
+      showModalMsg(`Loaded "${file.name}". Click APPLY to use.`, "ok");
+    };
+    reader.onerror = () => showModalMsg("Could not read that file.", "err");
+    reader.readAsText(file);
+  }
+  function applyFromModal() {
+    const text = document.getElementById("pasteArea").value.trim();
+    if (!text) { showModalMsg("Paste questions or pick a file first.", "err"); return; }
+    try {
+      let parsed;
+      if (modalFormat === "json") parsed = parseJsonRounds(text);
+      else if (text.startsWith("[") || text.startsWith("{")) {
+        try { parsed = parseJsonRounds(text); } catch { parsed = parseTextRounds(text); }
+      } else parsed = parseTextRounds(text);
+      saveRoundsToStorage(parsed); ROUNDS = parsed;
+      const total = parsed.reduce((n, r) => n + r.questions.length, 0);
+      showModalMsg(`Loaded ${parsed.length} categories, ${total} questions.`, "ok");
+      setTimeout(() => { closeLoadModal(); render(); }, 600);
+    } catch (err) {
+      showModalMsg("Could not load: " + err.message, "err");
+    }
+  }
+
+  // BOOT (host)
+  render();
+})();
+
+// ============================================================
+// PHONE MODE
+// ============================================================
+if (MODE === "phone") (async function phoneMain() {
+  // Hide footer kbd hints on phone
+  document.getElementById("footerControls").innerHTML = `<span>ROOM <kbd>${escapeHtml(JOIN_CODE)}</kbd></span>`;
+  document.getElementById("footerNote").textContent = "TYPE YOUR ANSWER · SUBMIT ON YOUR PHONE";
+
+  let user = null;
+  let roomData = null;
+  let teamName = localStorage.getItem("tw-team-name") || "";
+  let lastQKey = "";
+  let submittedKey = "";
+
+  function setMeta(text) { getMeta().innerHTML = text ? `<div class="chip">${text}</div>` : ""; }
+
+  function renderError(msg) {
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="phone-screen">
+          <h2>OOPS</h2>
+          <div class="phone-error">${escapeHtml(msg)}</div>
+          <p>Check the room code on the main screen and try again.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderNameEntry() {
+    setMeta(`ROOM ${JOIN_CODE}`);
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="phone-screen pop">
+          <h2>JOIN ROOM ${escapeHtml(JOIN_CODE)}</h2>
+          <p>Pick a team name. Everyone on your team should see this on one phone.</p>
+          <input class="phone-input" id="nameInput" type="text" maxlength="24" placeholder="e.g. Wing Squad" value="${escapeHtml(teamName)}" />
+          <button class="phone-btn" id="joinBtn">JOIN GAME</button>
+        </div>
+      </div>
+    `;
+    const input = document.getElementById("nameInput");
+    input.focus();
+    document.getElementById("joinBtn").addEventListener("click", join);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") join(); });
+  }
+
+  async function join() {
+    const input = document.getElementById("nameInput");
+    const name = (input?.value || "").trim();
+    if (!name) { input.focus(); return; }
+    teamName = name;
+    localStorage.setItem("tw-team-name", name);
+    document.getElementById("joinBtn").disabled = true;
+    try {
+      await setDoc(doc(db, "rooms", JOIN_CODE, "teams", user.uid), {
+        name, joinedAt: serverTimestamp(), uid: user.uid,
+      });
+      renderForState();
+    } catch (e) {
+      console.error(e);
+      renderError("Could not join the room. Try again.");
+    }
+  }
+
+  function renderForState() {
+    if (!roomData) { renderError("Room not found."); return; }
+    setMeta(`ROOM ${JOIN_CODE}`);
+    switch (roomData.state) {
+      case "lobby":         return renderWaiting();
+      case "round_intro":   return renderRoundIntro();
+      case "question":      return renderQuestion();
+      case "round_end":     return renderRoundEnd();
+      case "end":           return renderFinal();
+      default: return renderWaiting();
+    }
+  }
+
+  function renderWaiting() {
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="phone-screen pop">
+          <span class="phone-team">${escapeHtml(teamName)}</span>
+          <h2>YOU'RE IN!</h2>
+          <p>Waiting for the host to start the game…</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRoundIntro() {
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="phone-screen pop">
+          <span class="phone-team">${escapeHtml(teamName)}</span>
+          <h2>ROUND ${(roomData.roundIdx || 0) + 1}</h2>
+          <div class="phone-cat">${escapeHtml(String(roomData.currentCategory || "").toUpperCase())}</div>
+          <p style="margin-top:14px;">Get ready! First question is coming…</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderQuestion() {
+    const qKey = `${roomData.roundIdx}_${roomData.questionIdx}`;
+    const alreadySubmitted = (submittedKey === qKey);
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="phone-screen pop">
+          <span class="phone-team">${escapeHtml(teamName)}</span>
+          <div class="phone-cat">${escapeHtml(String(roomData.currentCategory || "").toUpperCase())}</div>
+          <div class="phone-question">
+            <span class="qnum">Q${(roomData.questionIdx || 0) + 1}</span>${escapeHtml(roomData.currentQuestion || "")}
+          </div>
+          ${
+            alreadySubmitted
+              ? `<div class="phone-submitted">✓ ANSWER SUBMITTED</div>
+                 <p>Wait for the next question…</p>`
+              : `<input class="phone-input" id="ansInput" type="text" autocomplete="off" autocapitalize="off" placeholder="Type your answer" />
+                 <button class="phone-btn" id="subBtn">SUBMIT ANSWER</button>`
+          }
+        </div>
+      </div>
+    `;
+    if (!alreadySubmitted) {
+      const input = document.getElementById("ansInput");
+      input.focus();
+      const submit = async () => {
+        const ans = input.value.trim();
+        if (!ans) { input.focus(); return; }
+        document.getElementById("subBtn").disabled = true;
+        const id = `${roomData.roundIdx}_${roomData.questionIdx}_${user.uid}`;
+        try {
+          await setDoc(doc(db, "rooms", JOIN_CODE, "submissions", id), {
+            teamId: user.uid,
+            teamName,
+            roundIdx: roomData.roundIdx,
+            questionIdx: roomData.questionIdx,
+            answer: ans,
+            submittedAt: serverTimestamp(),
+          });
+          submittedKey = qKey;
+          renderForState();
+        } catch (e) {
+          console.error(e);
+          document.getElementById("subBtn").disabled = false;
+          alert("Submission failed. Try again.");
+        }
+      };
+      document.getElementById("subBtn").addEventListener("click", submit);
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+    }
+  }
+
+  function renderRoundEnd() {
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="phone-screen pop">
+          <span class="phone-team">${escapeHtml(teamName)}</span>
+          <h2>ROUND ${(roomData.roundIdx || 0) + 1} COMPLETE</h2>
+          <p>Answers are revealed on the main screen.<br/>Tally your team's score!</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFinal() {
+    getMain().innerHTML = `
+      <div class="view">
+        <div class="phone-screen pop">
+          <span class="phone-team">${escapeHtml(teamName)}</span>
+          <h2>THANKS FOR PLAYING!</h2>
+          <p>Hope you had fun.<br/>Highest score wins!</p>
+        </div>
+      </div>
+    `;
+  }
+
+  // Boot phone
+  try {
+    user = await ensureAuth();
+    const roomRef = doc(db, "rooms", JOIN_CODE);
+    const initial = await getDoc(roomRef);
+    if (!initial.exists()) { renderError(`Room ${JOIN_CODE} not found. Check the code.`); return; }
+    // Subscribe to room state
+    onSnapshot(roomRef, (snap) => {
+      const prev = roomData;
+      roomData = snap.data();
+      if (!roomData) { renderError("Room closed."); return; }
+      const newQKey = `${roomData.roundIdx}_${roomData.questionIdx}`;
+      if (newQKey !== lastQKey) {
+        lastQKey = newQKey;
+        // clear submitted marker when question changes
+        if (roomData.state === "question") submittedKey = "";
+      }
+      // If team hasn't joined yet, stay on name entry
+      const hasName = !!teamName;
+      if (!hasName) renderNameEntry();
+      else renderForState();
+    });
+    // Show name entry first if no name; we'll attach the team doc on join
+    if (!teamName) renderNameEntry();
+  } catch (e) {
+    console.error(e);
+    renderError("Could not connect. Check your network and try again.");
+  }
+})();
+</script>
+</body>
+</html>
